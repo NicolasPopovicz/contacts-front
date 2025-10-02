@@ -1,6 +1,7 @@
 import { apiFetch } from './fetch'
 
+// Consulta o endereço quando digitado o CEP ou estado/cidade/endereco
 export async function searchAddress(params: Record<string,string>) {
-    const q = new URLSearchParams(params).toString()
-    return apiFetch(`/address/search?${q}`)
+    const qString = new URLSearchParams(params).toString()
+    return apiFetch(`/address/search?${qString}`)
 }

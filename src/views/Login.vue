@@ -7,21 +7,21 @@
                         <v-card-title>Login</v-card-title>
 
                         <v-card-text>
-                            <v-text-field v-model="email" label="Email" type="email" :disabled="loading" required />
-                            <v-text-field v-model="password" label="Senha" type="password" :disabled="loading"
-                                required />
+                            <v-text-field v-model="email" :disabled="loading" variant="outlined" label="Email" type="email" required/>
+                            <v-text-field v-model="password" :disabled="loading" variant="outlined" label="Senha" type="password" required/>
                         </v-card-text>
 
-                        <v-card-actions class="d-flex flex-column">
-                            <v-btn color="primary" block type="submit" :loading="loading">
+                        <v-card-actions class="d-flex flex-column px-4">
+                            <v-btn color="primary" block type="submit" variant="outlined" :loading="loading">
                                 Entrar
                             </v-btn>
 
-                            <div class="d-flex justify-space-between mt-3" style="width:100%;">
-                                <router-link to="/forgot-password">Esqueci minha senha</router-link>
+                            <div class="d-flex align-center justify-space-between mt-3" style="width:100%;">
+                                <router-link to="/forgot-password">
+                                    <v-btn variant="plain" size="small">Esqueci minha senha</v-btn>
+                                </router-link>
 
-                                <!-- botão para redirecionar para tela de cadastro -->
-                                <v-btn variant="text" color="secondary" @click="goRegister" :disabled="loading">
+                                <v-btn @click="goRegister" :disabled="loading" variant="outlined" color="secondary">
                                     Criar conta
                                 </v-btn>
                             </div>
@@ -29,8 +29,6 @@
                     </form>
                 </v-card>
 
-                <!-- alerta reutilizável -->
-                <Alert v-if="alert.message" :message="alert.message" :type="alert.type" />
             </v-col>
         </v-row>
     </v-container>
@@ -39,40 +37,34 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '../stores/auth'
-import Alert from '../components/Alert.vue'
+
+// Auth
+import { useAuthStore } from '@/stores/auth'
+
+// Modal
+import { useToastStore } from '@/stores/toast'
+
+// Utils
+import { handleApiError } from '@/utils/parseApiError'
 
 const email    = ref('')
 const password = ref('')
-const alert    = ref({ message: '', type: 'success' })
 const loading  = ref(false)
 
-const auth = useAuthStore()
+const toast  = useToastStore();
+const auth   = useAuthStore()
 const router = useRouter()
-
-const parseErrorMessage = (err) => {
-    if (!err) return 'Falha na requisição.'
-    if (typeof err === 'string') return err
-    if (err.message) return err.message
-    if (err.errors) {
-        // transforma { field: [msgs] } em uma string
-        return Object.values(err.errors).flat().join(' ')
-    }
-    return 'Falha no login.'
-}
 
 const handleLogin = async () => {
     loading.value = true
-    alert.value = { message: '', type: 'success' }
 
     try {
         await auth.login(email.value, password.value)
-        alert.value = { message: 'Login realizado com sucesso!', type: 'success' }
-        // redireciona breve para a lista
-        setTimeout(() => router.push('/contacts'), 700)
+        toast.success('Login realizado com sucesso!')
+
+        router.push('/contacts')
     } catch (err) {
-        const msg = parseErrorMessage(err)
-        alert.value = { message: msg, type: 'error' }
+        handleApiError(err)
     } finally {
         loading.value = false
     }

@@ -16,15 +16,22 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-const props = defineProps<{ modelValue: boolean; message?: string }>()
-const emit = defineEmits(['update:modelValue', 'confirm'])
+
+const props   = defineProps<{ modelValue: boolean; message?: string }>()
+const emit    = defineEmits(['update:modelValue', 'confirm'])
 const loading = ref(false)
 
 const model = computed({
-    get: () => props.modelValue,
+    get: ()  => props.modelValue,
     set: (v) => emit('update:modelValue', v)
 })
-const confirm = async () => { loading.value = true; await emit('confirm'); loading.value = false; model.value = false }
+
+const confirm = () => {
+    loading.value = true;
+    emit('confirm');
+    loading.value = false;
+    model.value = false
+}
 </script>
 
 <style>

@@ -1,4 +1,3 @@
-<!-- src/App.vue -->
 <template>
     <!-- container de toasts fixado no topo direito -->
     <ToastContainer />

@@ -4,8 +4,8 @@
             <v-app-bar-title class="text-primary">Contacts App</v-app-bar-title>
             <v-spacer />
             <v-btn variant="text" color="primary" to="/contacts">Contatos</v-btn>
-            <v-btn variant="text" color="primary" to="/account">Minha Conta</v-btn>
-            <v-btn variant="outlined" color="error" @click="logout">Sair</v-btn>
+            <v-btn variant="text" color="primary" class="mx-2" to="/account">Minha Conta</v-btn>
+            <v-btn @click="logout" variant="outlined" color="error">Sair</v-btn>
         </v-app-bar>
 
         <v-main>
@@ -15,10 +15,15 @@
 </template>
 
 <script setup>
-import { useAuthStore } from '../stores/auth'
 import { useRouter } from 'vue-router'
 
-const auth = useAuthStore()
+// Auth
+import { useAuthStore } from '@/stores/auth'
+
+// Utils
+import { handleApiError } from '@/utils/parseApiError'
+
+const auth   = useAuthStore()
 const router = useRouter()
 
 const logout = async () => {
@@ -26,6 +31,7 @@ const logout = async () => {
         await auth.logout()
         router.push('/login')
     } catch (err) {
+        handleApiError(err)
         console.error('Erro no logout', err)
     }
 }

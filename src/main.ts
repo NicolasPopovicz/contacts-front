@@ -23,7 +23,7 @@ const vuetify = createVuetify({
                     primary: '#4CAF50',
                     secondary: '#81C784',
                     accent: '#2E7D32',
-                    error: '#E57373',
+                    error: '#e75757ff',
                     success: '#66BB6A',
                     warning: '#FFB74D',
                 },

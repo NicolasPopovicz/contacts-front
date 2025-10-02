@@ -3,34 +3,42 @@
         <v-card class="mx-auto mt-10 pa-6" max-width="400">
             <v-card-title>Recuperar Senha</v-card-title>
             <v-card-text>
-                <v-text-field v-model="email" label="Email" type="email" />
+                <v-text-field v-model="email" variant="outlined" label="Email" type="email" />
             </v-card-text>
-            <v-card-actions>
-                <v-btn color="primary" block @click="handleForgot">Enviar link</v-btn>
+            <v-card-actions class="px-4 d-flex justify-space-between">
+                <router-link to="/login">
+                    <v-btn variant="plain" size="small">Voltar</v-btn>
+                </router-link>
+                <v-btn @click="handleForgot" variant="outlined" color="primary">Enviar link</v-btn>
             </v-card-actions>
         </v-card>
-
-        <Alert v-if="alert.message" :message="alert.message" :type="alert.type" />
     </v-container>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import { apiFetch } from '../api/fetch'
-import Alert from '../components/Alert.vue'
+
+// Api
+import { apiFetch } from '@/api/fetch'
+
+// Modal
+import { useToastStore } from '@/stores/toast'
+
+// Utils
+import { handleApiError } from '@/utils/parseApiError'
 
 const email = ref('')
-const alert = ref({ message: '', type: 'success' })
+const toast = useToastStore();
 
 const handleForgot = async () => {
     try {
         await apiFetch('/forgot-password', {
             method: 'POST',
-            body: JSON.stringify({ email: email.value })
+            body:   JSON.stringify({ email: email.value })
         })
-        alert.value = { message: 'Link enviado para o email!', type: 'success' }
+        toast.success('Link enviado para o email!');
     } catch (err) {
-        alert.value = { message: err.message || 'Erro ao enviar link.', type: 'error' }
+        handleApiError(err)
     }
 }
 </script>

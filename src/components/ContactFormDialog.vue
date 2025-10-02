@@ -8,42 +8,45 @@
                     <v-form ref="formRef">
                         <v-row dense>
                             <v-col cols="12">
-                                <v-text-field v-model="form.name" label="Nome" :rules="[rules.required]" />
+                                <v-text-field :rules="[rules.required]" v-model="form.name" variant="outlined" label="Nome"/>
                             </v-col>
 
                             <v-col cols="12" md="6">
-                                <v-text-field v-model="form.phone" label="Telefone" :rules="[rules.required]" />
+                                <v-text-field :rules="[rules.required]" v-model="form.phone" variant="outlined" label="Telefone"/>
                             </v-col>
 
                             <v-col cols="12" md="6">
-                                <v-text-field v-model="form.cpf" label="CPF" :rules="[rules.required]" />
-                            </v-col>
-
-                            <v-col cols="12" md="4">
-                                <v-text-field v-model="form.cep" label="CEP" :rules="[rules.required]"
-                                    @focusout="handleCepSearch" />
-                            </v-col>
-
-                            <v-col cols="12" md="2">
-                                <v-text-field v-model="form.state" label="UF" maxlength="2"
-                                    @focusout="handleAddressSearch" />
-                            </v-col>
-
-                            <v-col cols="12" md="6">
-                                <v-text-field v-model="form.city" label="Cidade" @focusout="handleAddressSearch" />
-                            </v-col>
-
-                            <v-col cols="12" md="9">
-                                <v-text-field v-model="form.address" label="Logradouro"
-                                    @focusout="handleAddressSearch" />
+                                <v-text-field :rules="[rules.required]" v-model="form.cpf" variant="outlined" label="CPF"/>
                             </v-col>
 
                             <v-col cols="12" md="3">
-                                <v-text-field v-model="form.number" label="Número" :rules="[rules.required]" />
+                                <v-text-field :rules="[rules.required]" v-model="form.cep" @focusout="handleCepSearch"
+                                    variant="outlined" label="CEP"
+                                />
+                            </v-col>
+
+                            <v-col cols="12" md="3">
+                                <v-text-field :rules="[rules.required]" v-model="form.state" @focusout="handleAddressSearch"
+                                    variant="outlined" label="UF" maxlength="2"
+                                />
+                            </v-col>
+
+                            <v-col cols="12" md="6">
+                                <v-text-field :rules="[rules.required]" v-model="form.city" @focusout="handleAddressSearch"
+                                    variant="outlined" label="Cidade"
+                                />
+                            </v-col>
+
+                            <v-col cols="12" md="9">
+                                <v-text-field v-model="form.address"@focusout="handleAddressSearch" variant="outlined" label="Logradouro"/>
+                            </v-col>
+
+                            <v-col cols="12" md="3">
+                                <v-text-field :rules="[rules.required]" v-model="form.number" variant="outlined" label="Número"/>
                             </v-col>
 
                             <v-col cols="12">
-                                <v-text-field v-model="form.complement" label="Complemento (opcional)" />
+                                <v-text-field v-model="form.complement" variant="outlined" label="Complemento (opcional)"/>
                             </v-col>
 
                             <input type="hidden" v-model="form.latitude" />
@@ -54,8 +57,8 @@
 
                 <v-card-actions>
                     <v-spacer />
-                    <v-btn variant="text" @click="close">Cancelar</v-btn>
-                    <v-btn color="primary" :loading="loading" @click="save">
+                    <v-btn @click="close" variant="text">Cancelar</v-btn>
+                    <v-btn :loading="loading" @click="save" color="primary">
                         {{ isEdit ? 'Salvar' : 'Criar' }}
                     </v-btn>
                 </v-card-actions>
@@ -65,8 +68,12 @@
                     <v-card-title>Selecione um endereço</v-card-title>
                     <v-card-text>
                         <v-list>
-                            <v-list-item v-for="(opt, i) in addressOptions" :key="i" @click="chooseAddress(opt)"
-                                class="hover:bg-surface cursor-pointer">
+                            <v-list-item
+                                v-for="(opt, i) in addressOptions"
+                                :key="i"
+                                @click="chooseAddress(opt)"
+                                class="hover:bg-surface cursor-pointer"
+                            >
                                 {{ opt.logradouro }}, {{ opt.bairro }} - {{ opt.localidade }}/{{ opt.uf }} ({{ opt.cep }})
                             </v-list-item>
                         </v-list>
@@ -84,9 +91,19 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue'
-import { searchAddress } from '../api/address'
-import { createContact, updateContact, type Contact } from '../api/contacts'
-import { useToastStore } from '../stores/toast'
+
+// Api
+import { searchAddress } from '@/api/address'
+import { createContact, updateContact } from '@/api/contacts'
+
+// Modal
+import { useToastStore } from '@/stores/toast'
+
+// Types
+import type { Contact } from '@/types/Contacts'
+
+// Utils
+import { handleApiError } from '@/utils/parseApiError'
 
 const resetForm = () => {
     Object.assign(form, {
@@ -166,15 +183,15 @@ const handleCepSearch = async () => {
                     fillAddressFields(address)
                     toast.success('Endereço preenchido a partir do CEP.')
                 } else {
-                    toast.error('Nenhum endereço encontrado para este CEP.')
+                    handleApiError('Nenhum endereço encontrado para este CEP.')
                 }
             }
 
             if (!data.success) {
-                toast.error(`Ocorreu algum problema com a API: ${data.message}`)
+                handleApiError(data)
             }
         } catch (err) {
-            toast.error('Erro ao consultar CEP.')
+            handleApiError(err)
         }
     }
 }
@@ -199,28 +216,29 @@ const handleAddressSearch = () => {
 
                     if (Array.isArray(dataReturned)) {
                         if (dataReturned.length === 1) {
-                            fillAddressFields(data[0])
+                            fillAddressFields(dataReturned[0])
                             toast.success('Endereço preenchido.')
                         } else if (dataReturned.length > 1) {
                             addressOptions.value    = dataReturned
                             showAddressSelect.value = true
                         } else {
-                            toast.error('Nenhum endereço encontrado.')
+                            handleApiError('Nenhum endereço encontrado.')
                         }
                     }
                 }
 
                 if (!data.success) {
-                    toast.error(`Ocorreu algum problema com a API: ${data.message}`)
+                    handleApiError(data)
                 }
 
             } catch (err) {
-                toast.error('Erro ao consultar endereço.')
+                handleApiError(err)
             }
         }
     }, 500) // espera 0.5s após sair do último campo
 }
 
+// Evento que indica qual endereço foi selecionado
 const chooseAddress = (addr: any) => {
     fillAddressFields(addr)
     showAddressSelect.value = false
@@ -228,24 +246,17 @@ const chooseAddress = (addr: any) => {
     toast.success('Endereço selecionado.')
 }
 
+// Preenche o formulário com o endereço selecionado na lista
 const fillAddressFields = (addr: any) => {
-    console.log(addr);
-    form.cep       = addr.cep?.replace(/\D/g, '') || ''
-    form.address   = addr.logradouro || ''
-    form.city      = addr.localidade || ''
-    form.state     = addr.uf || ''
-    form.latitude  = String(addr.latitude) || ''
-    form.longitude = String(addr.longitude) || ''
+    form.cep        = addr.cep?.replace(/\D/g, '') || ''
+    form.address    = addr.logradouro || ''
+    form.city       = addr.localidade || ''
+    form.state      = addr.uf || ''
+    form.latitude   = String(addr.latitude) || ''
+    form.longitude  = String(addr.longitude) || ''
 }
 
 const close = () => { model.value = false }
-
-const parseError = (err: any) => {
-    if (typeof err === 'string') return err
-    if (err?.message) return err.message
-    if (err?.errors) return Object.values(err.errors).flat().join(' ')
-    return 'Erro ao salvar contato.'
-}
 
 const save = async () => {
     const valid = await formRef.value?.validate()
@@ -255,16 +266,30 @@ const save = async () => {
     try {
         loading.value = true
         if (isEdit.value && props.contact) {
-            await updateContact(props.contact.id, form)
-            toast.success('Contato atualizado com sucesso!')
+            const res = await updateContact(props.contact.id, form)
+
+            if (res.success) {
+                toast.success('Contato atualizado com sucesso!')
+            }
+
+            if (!res.success) {
+                handleApiError(res)
+            }
         } else {
-            await createContact(form)
-            toast.success('Contato criado com sucesso!')
+            const res = await createContact(form)
+
+            if (res.success) {
+                toast.success('Contato criado com sucesso!')
+            }
+
+            if (!res.success) {
+                handleApiError(res)
+            }
         }
         emit('saved')
         close()
     } catch (err) {
-        toast.error(parseError(err))
+        handleApiError(err)
     } finally {
         loading.value = false
     }

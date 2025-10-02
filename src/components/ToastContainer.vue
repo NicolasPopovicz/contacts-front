@@ -1,8 +1,15 @@
 <template>
     <div class="toast-container">
         <transition-group name="toast-slide">
-            <v-alert v-for="t in toasts" :key="t.id" :type="t.type" elevation="2" class="mb-2 toast" border="start"
-                @click="dismiss(t.id)">
+            <v-alert
+                v-for="t in toasts"
+                :key="t.id"
+                :type="t.type"
+                @click="dismiss(t.id)"
+                elevation="2"
+                class="mb-2 toast"
+                border="start"
+            >
                 <div class="whitespace-pre-wrap break-words">
                     {{ t.message }}
                 </div>
@@ -13,15 +20,18 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted } from 'vue'
-import { useToastStore } from '../stores/toast'
 
-const store = useToastStore()
+// Modal
+import { useToastStore } from '@/stores/toast'
+
+const store  = useToastStore()
 const toasts = computed(() => store.toasts)
 
 const dismiss = (id: number) => store.remove(id)
 
 let interval: any
-onMounted(() => { interval = setInterval(() => store.gc(), 1000) })
+
+onMounted(()   => { interval = setInterval(() => store.gc(), 1000) })
 onUnmounted(() => { clearInterval(interval) })
 </script>
 
