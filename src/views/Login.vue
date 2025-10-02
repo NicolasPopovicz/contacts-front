@@ -56,9 +56,9 @@ const auth   = useAuthStore()
 const router = useRouter()
 
 const handleLogin = async () => {
-    loading.value = true
-
     try {
+        loading.value = true
+
         await auth.login(email.value, password.value)
         toast.success('Login realizado com sucesso!')
 

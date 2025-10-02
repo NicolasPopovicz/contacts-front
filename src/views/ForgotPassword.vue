@@ -27,11 +27,15 @@ import { useToastStore } from '@/stores/toast'
 // Utils
 import { handleApiError } from '@/utils/parseApiError'
 
-const email = ref('')
-const toast = useToastStore();
+const loading = ref(false)
+const email   = ref('')
+const toast   = useToastStore();
 
 const handleForgot = async () => {
+
     try {
+        loading.value = true
+
         await apiFetch('/forgot-password', {
             method: 'POST',
             body:   JSON.stringify({ email: email.value })
@@ -39,6 +43,8 @@ const handleForgot = async () => {
         toast.success('Link enviado para o email!');
     } catch (err) {
         handleApiError(err)
+    } finally {
+        loading.value = false
     }
 }
 </script>

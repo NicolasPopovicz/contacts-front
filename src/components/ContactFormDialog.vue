@@ -20,25 +20,23 @@
                             </v-col>
 
                             <v-col cols="12" md="3">
-                                <v-text-field :rules="[rules.required]" v-model="form.cep" @focusout="handleCepSearch"
-                                    variant="outlined" label="CEP"
-                                />
+                                <v-text-field :rules="[rules.required]" v-model="form.cep" :disabled="searching" variant="outlined" label="CEP"/>
                             </v-col>
 
                             <v-col cols="12" md="3">
-                                <v-text-field :rules="[rules.required]" v-model="form.state" @focusout="handleAddressSearch"
+                                <v-text-field :rules="[rules.required]" v-model="form.state" @focusout="handleAddressSearch" :disabled="searching"
                                     variant="outlined" label="UF" maxlength="2"
                                 />
                             </v-col>
 
                             <v-col cols="12" md="6">
-                                <v-text-field :rules="[rules.required]" v-model="form.city" @focusout="handleAddressSearch"
+                                <v-text-field :rules="[rules.required]" v-model="form.city" @focusout="handleAddressSearch" :disabled="searching"
                                     variant="outlined" label="Cidade"
                                 />
                             </v-col>
 
                             <v-col cols="12" md="9">
-                                <v-text-field v-model="form.address"@focusout="handleAddressSearch" variant="outlined" label="Logradouro"/>
+                                <v-text-field v-model="form.address"@focusout="handleAddressSearch" :disabled="searching" variant="outlined" label="Logradouro"/>
                             </v-col>
 
                             <v-col cols="12" md="3">
@@ -58,7 +56,7 @@
                 <v-card-actions>
                     <v-spacer />
                     <v-btn @click="close" variant="text">Cancelar</v-btn>
-                    <v-btn :loading="loading" @click="save" color="primary">
+                    <v-btn :loading="loading || searching" @click="save" :disabled="searching" color="primary">
                         {{ isEdit ? 'Salvar' : 'Criar' }}
                     </v-btn>
                 </v-card-actions>
@@ -135,6 +133,8 @@ const model = computed({
 const toast   = useToastStore()
 const loading = ref(false)
 
+const searching = ref(false)
+
 const formRef = ref()
 const form    = reactive({
     name: '',   address: '',    cpf: '',   phone: '', cep: '',
@@ -163,38 +163,38 @@ watch(() => props.contact, (isOpen) => {
     }
 }, { immediate: true })
 
-const handleCepSearch = async () => {
-    if (addressLocked.value || !form.cep) return
+// const handleCepSearch = async () => {
+//     if (addressLocked.value || !form.cep) return
 
-    const cep = form.cep?.replace(/\D/g, '')
+//     const cep = form.cep?.replace(/\D/g, '')
 
-    if (cep && cep.length === 8) {
-        try {
-            const data = await searchAddress({ cep })
+//     if (cep && cep.length === 8) {
+//         try {
+//             const data = await searchAddress({ cep })
 
-            if (data.success) {
-                const dataReturned = data.data;
+//             if (data.success) {
+//                 const dataReturned = data.data;
 
-                const address = typeof dataReturned === "object"
-                    ? dataReturned
-                    : (Array.isArray(dataReturned) && data.length > 0 ? dataReturned[0] : [])
+//                 const address = typeof dataReturned === "object"
+//                     ? dataReturned
+//                     : (Array.isArray(dataReturned) && data.length > 0 ? dataReturned[0] : [])
 
-                if (dataReturned) {
-                    fillAddressFields(address)
-                    toast.success('Endereço preenchido a partir do CEP.')
-                } else {
-                    handleApiError('Nenhum endereço encontrado para este CEP.')
-                }
-            }
+//                 if (dataReturned) {
+//                     fillAddressFields(address)
+//                     toast.success('Endereço preenchido a partir do CEP.')
+//                 } else {
+//                     handleApiError('Nenhum endereço encontrado para este CEP.')
+//                 }
+//             }
 
-            if (!data.success) {
-                handleApiError(data)
-            }
-        } catch (err) {
-            handleApiError(err)
-        }
-    }
-}
+//             if (!data.success) {
+//                 handleApiError(data)
+//             }
+//         } catch (err) {
+//             handleApiError(err)
+//         }
+//     }
+// }
 
 const handleAddressSearch = () => {
     if (addressLocked.value) return
@@ -205,6 +205,7 @@ const handleAddressSearch = () => {
     searchTimeout = setTimeout(async () => {
         if (form.state && form.city && form.address) {
             try {
+                searching.value = true
                 const data = await searchAddress({
                     state:   form.state,
                     city:    form.city,
@@ -233,9 +234,11 @@ const handleAddressSearch = () => {
 
             } catch (err) {
                 handleApiError(err)
+            } finally {
+                searching.value = false
             }
         }
-    }, 500) // espera 0.5s após sair do último campo
+    }, 250) // espera 0.5s após sair do último campo
 }
 
 // Evento que indica qual endereço foi selecionado

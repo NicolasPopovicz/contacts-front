@@ -3,10 +3,10 @@
         <v-card class="mx-auto mt-10 pa-6" max-width="400">
             <v-card-title>Criar Conta</v-card-title>
             <v-card-text>
-                <v-text-field v-model="name" :rules="[rules.required]" variant="outlined" label="Nome" required/>
-                <v-text-field v-model="email" :rules="[rules.required]" variant="outlined" label="Email" type="email" required/>
-                <v-text-field v-model="password" :rules="[rules.required]" variant="outlined" label="Senha" type="password" required/>
-                <v-text-field v-model="password_confirmation" :rules="[rules.required]" variant="outlined" label="Confirme a Senha" type="password" required/>
+                <v-text-field v-model="name" :disabled="loading" :rules="[rules.required]" variant="outlined" label="Nome" required/>
+                <v-text-field v-model="email" :disabled="loading" :rules="[rules.required]" variant="outlined" label="Email" type="email" required/>
+                <v-text-field v-model="password" :disabled="loading" :rules="[rules.required]" variant="outlined" label="Senha" type="password" required/>
+                <v-text-field v-model="password_confirmation" :disabled="loading" :rules="[rules.required]" variant="outlined" label="Confirme a Senha" type="password" required/>
             </v-card-text>
             <v-card-actions class="px-4">
                 <v-btn @click="handleRegister" color="primary" variant="outlined" block>Registrar</v-btn>
@@ -33,6 +33,7 @@ import { useToastStore } from '@/stores/toast'
 // Utils
 import { handleApiError } from '@/utils/parseApiError'
 
+const loading  = ref(false)
 const name     = ref('')
 const email    = ref('')
 const password = ref('')
@@ -53,12 +54,12 @@ const handleRegister = async () => {
     }
 
     try {
+        loading.value = true
+
         const res = await apiFetch('/register', {
             method: 'POST',
             body: JSON.stringify({ name: name.value, email: email.value, password: password.value, password_confirmation: password_confirmation.value })
         })
-
-        console.log(res);
 
         if (res.success) {
             toast.success('Cadastro realizado! Redirecionando para o login.')
@@ -70,6 +71,8 @@ const handleRegister = async () => {
         }
     } catch (err: any) {
         handleApiError(err)
+    } finally {
+        loading.value = false
     }
 }
 </script>

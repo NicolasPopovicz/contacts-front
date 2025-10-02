@@ -3,12 +3,19 @@
         <v-card class="mx-auto mt-10 pa-6" max-width="400">
             <v-card-title>Redefinir Senha</v-card-title>
             <v-card-text>
-                <v-text-field v-model="email" :rules="[rules.required]" variant="outlined" label="Email" type="email" required/>
-                <v-text-field v-model="password" :rules="[rules.required]" variant="outlined" label="Nova Senha" type="password" required/>
-                <v-text-field v-model="password_confirmation" :rules="[rules.required]" variant="outlined" label="Confirme a Senha" type="password" required/>
+                <v-text-field v-model="email" :disabled="loading" variant="outlined" label="Email" type="email" required/>
+                <v-text-field v-model="password" :disabled="loading" variant="outlined" label="Nova Senha" type="password" required/>
+                <v-text-field v-model="password_confirmation" :disabled="loading" variant="outlined" label="Confirme a Senha" type="password" required/>
             </v-card-text>
-            <v-card-actions>
-                <v-btn @click="handleReset" color="primary" block>Redefinir</v-btn>
+            <v-card-actions class="px-4">
+                <v-btn
+                    @click="handleReset"
+                    :loading="loading"
+                    :disabled="loading"
+                    variant="outlined"
+                    color="primary"
+                    block
+                >Redefinir</v-btn>
             </v-card-actions>
         </v-card>
     </v-container>
@@ -27,6 +34,7 @@ import { useToastStore } from '@/stores/toast'
 // Utils
 import { handleApiError } from '@/utils/parseApiError'
 
+const loading  = ref(false)
 const email    = ref('')
 const password = ref('')
 const password_confirmation = ref('')
@@ -36,7 +44,14 @@ const route  = useRoute()
 const router = useRouter()
 
 const handleReset = async () => {
+    if (password.value !== password_confirmation.value) {
+        handleApiError('As senhas precisam ser idênticas')
+        return;
+    }
+
     try {
+        loading.value = true
+
         await apiFetch('/reset-password', {
             method: 'POST',
             body: JSON.stringify({
@@ -47,9 +62,11 @@ const handleReset = async () => {
             })
         })
         toast.success('Senha redefinida com sucesso!')
-        setTimeout(() => router.push('/login'), 2000)
+        router.push('/login')
     } catch (err) {
         handleApiError(err)
+    } finally {
+        loading.value = false
     }
 }
 </script>

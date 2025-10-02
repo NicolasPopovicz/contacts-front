@@ -5,6 +5,7 @@
                 v-for="t in toasts"
                 :key="t.id"
                 :type="t.type"
+                :closable="false"
                 @click="dismiss(t.id)"
                 elevation="2"
                 class="mb-2 toast"
