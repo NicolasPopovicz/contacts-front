@@ -5,7 +5,7 @@
             <v-card-text>
                 <v-text-field v-model="email" label="Email" type="email" />
                 <v-text-field v-model="password" label="Nova Senha" type="password" />
-                <v-text-field v-model="password_confirmation" label="Confirme a Senha" type="password" />
+                <v-text-field v-model="password_confirmation" label="Confirme a Senha" type="password" :rules="[rules.required]" />
             </v-card-text>
             <v-card-actions>
                 <v-btn color="primary" block @click="handleReset">Redefinir</v-btn>
@@ -22,11 +22,11 @@ import { useRoute, useRouter } from 'vue-router'
 import { apiFetch } from '../api/fetch'
 import Alert from '../components/Alert.vue'
 
-const email = ref('')
+const email    = ref('')
 const password = ref('')
 const password_confirmation = ref('')
-const alert = ref({ message: '', type: 'success' })
-const route = useRoute()
+const alert  = ref({ message: '', type: 'success' })
+const route  = useRoute()
 const router = useRouter()
 
 const handleReset = async () => {

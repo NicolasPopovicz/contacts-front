@@ -22,9 +22,9 @@ import { useAuthStore } from '../stores/auth'
 import Alert from '../components/Alert.vue'
 
 const password = ref('')
-const alert = ref({ message: '', type: 'success' })
-const router = useRouter()
-const auth = useAuthStore()
+const alert    = ref({ message: '', type: 'success' })
+const router   = useRouter()
+const auth     = useAuthStore()
 
 const handleDelete = async () => {
     try {

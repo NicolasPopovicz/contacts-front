@@ -11,8 +11,8 @@ export type Contact = {
     complement?: string | null
     city: string
     state: string
-    latitude?: number | null
-    longitude?: number | null
+    latitude?: string | null
+    longitude?: string | null
     created_at?: string
     updated_at?: string
 }

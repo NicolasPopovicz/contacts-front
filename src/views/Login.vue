@@ -42,10 +42,10 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import Alert from '../components/Alert.vue'
 
-const email = ref('')
+const email    = ref('')
 const password = ref('')
-const alert = ref({ message: '', type: 'success' })
-const loading = ref(false)
+const alert    = ref({ message: '', type: 'success' })
+const loading  = ref(false)
 
 const auth = useAuthStore()
 const router = useRouter()

@@ -6,7 +6,7 @@
                 <v-text-field v-model="name" label="Nome" />
                 <v-text-field v-model="email" label="Email" type="email" />
                 <v-text-field v-model="password" label="Senha" type="password" />
-                <v-text-field v-model="password_confirmation" label="Confirme a Senha" type="password" />
+                <v-text-field v-model="password_confirmation" label="Confirme a Senha" type="password" :rules="[rules.required]" />
             </v-card-text>
             <v-card-actions>
                 <v-btn color="primary" block @click="handleRegister">Registrar</v-btn>
@@ -20,20 +20,30 @@
     </v-container>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { apiFetch } from '../api/fetch'
 import { useRouter } from 'vue-router'
-import Alert from '../components/Alert.vue'
+import Alert from '@/components/Alert.vue'
 
-const name = ref('')
-const email = ref('')
+const name     = ref('')
+const email    = ref('')
 const password = ref('')
 const password_confirmation = ref('')
-const alert = ref({ message: '', type: 'success' })
+const alert  = ref({ message: '', type: 'success' })
 const router = useRouter()
 
-const handleRegister = async () => {
+// regras de validação
+const rules = {
+    required: (v: string) => !!v || 'Campo obrigatório'
+}
+
+const handleRegister = async (e: any) => {
+    if (password.value !== password_confirmation.value) {
+        alert.value = { message: 'As senhas precisam ser idênticas', type: 'error' }
+        return;
+    }
+
     try {
         await apiFetch('/register', {
             method: 'POST',
@@ -41,7 +51,7 @@ const handleRegister = async () => {
         })
         alert.value = { message: 'Cadastro realizado! Faça login.', type: 'success' }
         setTimeout(() => router.push('/login'), 2000)
-    } catch (err) {
+    } catch (err: any) {
         alert.value = { message: err.message || 'Erro ao cadastrar.', type: 'error' }
     }
 }

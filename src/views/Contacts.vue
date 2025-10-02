@@ -1,29 +1,44 @@
-<!-- src/views/Contacts.vue -->
 <template>
-    <v-container>
-        <v-card class="pa-4">
-            <v-card-title>
-                <v-row align="center" class="w-100">
-                    <v-col cols="12" md="4" class="d-flex align-center">
-                        <v-text-field v-model="filter" density="comfortable" variant="outlined"
-                            label="Buscar por nome ou CPF" prepend-inner-icon="mdi-magnify" class="flex-grow-1 mr-3"
-                            @input="applyFilter" />
-                        <v-btn color="primary" @click="openCreate">Novo Contato</v-btn>
-                    </v-col>
-                </v-row>
-            </v-card-title>
+    <v-container fluid class="pa-4">
+        <v-row>
+            <v-col cols="12" md="6">
+                <v-card class="pa-4">
+                    <v-card-title>
+                        <v-row align="center" class="w-100 justify-end">
+                            <v-col cols="12" md="6" class="d-flex align-start py-0 pr-0 mt-5">
+                                <v-text-field v-model="filter" density="comfortable" variant="outlined"
+                                    label="Buscar por nome ou CPF" prepend-inner-icon="mdi-magnify" class="flex-grow-1 mr-3"
+                                    @input="applyFilter" />
+                                <v-btn color="primary" @click="openCreate">Novo Contato</v-btn>
+                            </v-col>
+                        </v-row>
+                    </v-card-title>
 
-            <v-card-text>
-                <v-data-table :headers="headers" :items="filtered" :page.sync="page" :items-per-page.sync="perPage"
-                    v-model:sort-by="sortBy" item-key="id" class="elevation-1" :loading="loading"
-                    loading-text="Carregando..." :footer-props="{ 'items-per-page-options': [5, 10, 20, 50] }">
-                    <template #item.actions="{ item }">
-                        <v-btn size="small" variant="text" @click="openEdit(item)">Editar</v-btn>
-                        <v-btn size="small" color="error" variant="text" @click="askDelete(item)">Excluir</v-btn>
-                    </template>
-                </v-data-table>
-            </v-card-text>
-        </v-card>
+                    <v-card-text>
+                        <v-data-table :headers="headers" :items="filtered" :page.sync="page" :items-per-page.sync="perPage"
+                            v-model:sort-by="sortBy" item-key="id" class="elevation-1" :loading="loading"
+                            loading-text="Carregando..." :footer-props="{ 'items-per-page-options': [5, 10, 20, 50] }"
+                        >
+                            <template #item.actions="{ item }">
+                                <!-- item.raw é seu objeto original -->
+                                <v-btn size="small" variant="text" @click.stop="selectContact(item)">
+                                    Ver no mapa
+                                </v-btn>
+                                <v-btn size="small" variant="text" @click="openEdit(item)">Editar</v-btn>
+                                <v-btn size="small" color="error" variant="text" @click="askDelete(item)">Excluir</v-btn>
+                            </template>
+                        </v-data-table>
+                    </v-card-text>
+                </v-card>
+            </v-col>
+
+            <!-- Mapa -->
+            <v-col cols="12" md="6">
+                <v-card>
+                    <div id="map" style="height: 700px;"></div>
+                </v-card>
+            </v-col>
+        </v-row>
 
         <ContactFormDialog v-model="showForm" :contact="editing" @saved="fetchData" />
         <ConfirmDialog v-model="showConfirm" :message="`Tem certeza que deseja excluir o contato '${editing?.name}'?`"
@@ -32,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { listContacts, deleteContact, type Contact } from '../api/contacts'
 import { useToastStore } from '../stores/toast'
 import ContactFormDialog from '../components/ContactFormDialog.vue'
@@ -42,19 +57,21 @@ import type { DataTableSortItem } from 'vuetify'
 const toast = useToastStore()
 
 const loading = ref(false)
-const rows = ref<Contact[]>([])
+const rows    = ref<Contact[]>([])
 
 const headers = [
-    { title: 'Nome', key: 'name', sortable: true },
-    { title: 'CPF', key: 'cpf', sortable: true },
-    { title: 'Telefone', key: 'phone', sortable: true },
-    { title: 'Cidade', key: 'city', sortable: true },
-    { title: 'UF', key: 'state', sortable: true },
-    { title: 'Ações', key: 'actions', sortable: false }
+    { title: 'Nome',     key: 'name',    sortable: true },
+    { title: 'CPF',      key: 'cpf',     sortable: true },
+    { title: 'Telefone', key: 'phone',   sortable: true },
+    { title: 'UF',       key: 'state',   sortable: true },
+    { title: 'Ações',    key: 'actions', sortable: false }
 ]
 
+let map: google.maps.Map | null = null
+let marker: google.maps.Marker | null = null
+
 // paginação / ordenação (no front)
-const page = ref(1)
+const page    = ref(1)
 const perPage = ref(10)
 
 // começa ordenando por "name" ascendente
@@ -93,9 +110,8 @@ const applyFilter = () => { page.value = 1 }
 async function fetchData() {
     try {
         loading.value = true
-        // Se teu backend já devolve paginação/ordenação, substitui por params
-        const res = await listContacts() // { data: [...] }
-        rows.value = res.data ?? res ?? [] // aceita {data:[...]} ou [...]
+        const res = await listContacts()
+        rows.value = res.data ?? res ?? []
     } catch (err: any) {
         toast.error(err?.message || 'Erro ao carregar contatos')
     } finally {
@@ -103,16 +119,43 @@ async function fetchData() {
     }
 }
 
-onMounted(fetchData)
+onMounted(async () => {
+    await fetchData()
 
-// modais
-const showForm = ref(false)
+    // inicializa mapa
+    map = new google.maps.Map(document.getElementById('map') as HTMLElement, {
+        center: { lat: -25.4554844, lng: -49.2404863 }, // Curitiba default
+        zoom: 11.91
+    })
+})
+
+const showForm    = ref(false)
 const showConfirm = ref(false)
-const editing = ref<Contact | null>(null)
+const editing     = ref<Contact | null>(null)
 
 const openCreate = () => { editing.value = null; showForm.value = true }
-const openEdit = (c: Contact) => { editing.value = c; showForm.value = true }
-const askDelete = (c: Contact) => { editing.value = c; showConfirm.value = true }
+const openEdit   = (c: Contact) => { editing.value = c; showForm.value = true }
+const askDelete  = (c: Contact) => { editing.value = c; showConfirm.value = true }
+
+const selectContact = (contact: Contact) => {
+    console.log(contact);
+    if (!map || !contact?.latitude || !contact?.longitude) return
+
+    const position = {
+        lat: Number(contact.latitude),
+        lng: Number(contact.longitude),
+    }
+
+    map.setCenter(position)
+    map.setZoom(15)
+
+    if (!marker) {
+        marker = new google.maps.Marker({ position, map, title: contact.name })
+    } else {
+        marker.setPosition(position)
+        marker.setTitle(contact.name)
+    }
+}
 
 const doDelete = async () => {
     if (!editing.value?.id) return

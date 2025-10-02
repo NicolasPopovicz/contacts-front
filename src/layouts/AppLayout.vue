@@ -1,14 +1,13 @@
 <template>
     <v-app>
         <v-app-bar flat color="surface">
-            <v-app-bar-title class="text-primary">📇 Meus Contatos</v-app-bar-title>
+            <v-app-bar-title class="text-primary">Contacts App</v-app-bar-title>
             <v-spacer />
             <v-btn variant="text" color="primary" to="/contacts">Contatos</v-btn>
             <v-btn variant="text" color="primary" to="/account">Minha Conta</v-btn>
             <v-btn variant="outlined" color="error" @click="logout">Sair</v-btn>
         </v-app-bar>
 
-        <!-- v-main já empurra o conteúdo abaixo da barra -->
         <v-main>
             <router-view />
         </v-main>
