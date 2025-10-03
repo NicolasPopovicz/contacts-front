@@ -1,42 +1,83 @@
-# contacts-front
+# 🌐 Frontend - Contacts App
 
-This template should help get you started developing with Vue 3 in Vite.
+Frontend em **Vue 3 + Vite + Pinia + Vuetify**, consumindo a API de contatos e oferecendo interface moderna (dark mode).
 
-## Recommended IDE Setup
+---
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## 🚀 Funcionalidades
+- Login, registro, logout, exclusão de conta.
+- Recuperação e redefinição de senha (via link recebido por e-mail).
+- Gerenciamento de contatos (CRUD completo).
+- Integração com Google Maps para exibir localização do contato.
+- Busca automática de endereço via API do backend.
+- Toasts de feedback (sucesso/erro) com slide e timeout.
+- Paginação, ordenação e filtros na tabela de contatos.
+- Modal de confirmação para ações destrutivas.
+- Proteção de rotas para usuários não autenticados.
 
-## Recommended Browser Setup
+---
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd) 
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+## ⚙️ Tecnologias
+- **Vue 3 + Vite**
+- **Pinia** (estado global)
+- **Vue Router**
+- **Vuetify 3**
+- **Google Maps JavaScript API**
 
-## Type Support for `.vue` Imports in TS
+---
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+## 🔑 Estrutura básica
+- `src/`
+- `api/`
+- `components/`
+- `layouts/`
+- `router/`
+- `stores/`
+- `utils/`
+- `views/`
 
-## Customize configuration
+---
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+## 🌍 Principais telas
+- `/login` → Login
+- `/register` → Registro de usuário
+- `/forgot-password` → Solicitar recuperação de senha
+- `/reset-password` → Redefinir senha usando token
+- `/contacts` → Listagem, busca e CRUD de contatos
+- `/account` → Excluir conta
+- Listagem de contatos com mapa interativo (Google Maps)
 
-## Project Setup
+---
 
-```sh
-npm install
+## ⚡ Configuração
+Crie um arquivo `.env.local`:
+
+```env
+VITE_API_URL=http://localhost:8000/api
+VITE_GOOGLE_MAPS_KEY=sua_chave_google
 ```
 
-### Compile and Hot-Reload for Development
+Não versionar .env.local.
 
-```sh
+## ▶️ Rodando o projeto
+
+```bash
+npm install
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
+Aplicação estará disponível em http://localhost:5173.
 
-```sh
-npm run build
-```
+## 📦 Notas
+
+Necessário backend rodando na porta configurada (VITE_API_URL).
+
+API key do Google deve estar restrita a domínios confiáveis.
+
+## 📚 Fluxo geral
+
+- Usuário cadastra-se e faz login.
+- Pode criar/editar/excluir contatos.
+- Pode recuperar senha via e-mail.
+- Ao selecionar contato, mapa mostra sua localização.
+- Conta pode ser excluída com confirmação e senha.

@@ -12,6 +12,10 @@ import AppLayout from '@/layouts/AppLayout.vue'
 const routes = [
     // rotas públicas
     {
+        path: '/',
+        redirect: '/login'
+    },
+    {
         path: '/login',
         component: () => import('@/views/Login.vue'),
         meta: { guest: true }

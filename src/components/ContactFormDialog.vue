@@ -238,7 +238,7 @@ const handleAddressSearch = () => {
                 searching.value = false
             }
         }
-    }, 250) // espera 0.5s após sair do último campo
+    }, 250)
 }
 
 // Evento que indica qual endereço foi selecionado
